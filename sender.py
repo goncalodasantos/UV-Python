@@ -1,31 +1,55 @@
-# socket_echo_client.py
 import socket
 import sys
+from threading import Thread
 
-# Create a TCP/IP socket
-sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-# Connect the socket to the port where the server is listening
-server_address = ('localhost', 10000)
-print('connecting to {} port {}'.format(*server_address))
-sock.connect(server_address)
+def client_thread(connection):
+
+    while 1:
+        
+        message=connection.recv(1024).decode("utf8")
+        print(":"+message)
+
+
+
+
+
+
+
+
+
+
+
+soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+host = "127.0.0.1"
+port = 8888
 
 try:
+    soc.connect((host, port))
+except:
+    print("Erro de Ligação")
+    sys.exit()
 
-    # Send data
-    message = b'This is the message.  It will be repeated.'
-    print('sending {!r}'.format(message))
-    sock.sendall(message)
+nome = input("Insira o nome: ")
 
-    # Look for the response
-    amount_received = 0
-    amount_expected = len(message)
 
-    while amount_received < amount_expected:
-        data = sock.recv(16)
-        amount_received += len(data)
-        print('received {!r}'.format(data))
+thread=Thread(target=client_thread, args=(soc,))
+thread.daemon=True
+thread.start()
 
-finally:
-    print('closing socket')
-    sock.close()
+
+print("Insira 'sair' para sair")
+message = input("")
+
+while message != 'sair':
+    message=nome.upper() + ": " + message
+    
+    soc.sendall(message.encode("utf8"))
+
+    message = input("")
+    
+soc.send(b'--sair--')
+
+
+
+
